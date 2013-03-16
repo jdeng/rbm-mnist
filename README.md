@@ -8,7 +8,7 @@ The Conjugate Gradient implementation is almost a direct translation of Carl Edw
 * spectrum.inl RGBs to map the weights to a color. Blue is 0 and red is close to 1.
 * demo.cc training/test demos
 
-# Visulization
+# Visualization
 Input is on Y-axis (rows) and output is on X-axis (columns). There are 4 RBMs in the sample image (rbm-131.png).
 
 # Build
