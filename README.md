@@ -3,6 +3,14 @@ The deep learning algorithm is based on the matlab code provided by Geoff Hinton
 
 The Conjugate Gradient implementation is almost a direct translation of Carl Edward Rasmussen's matlab code at http://learning.eng.cam.ac.uk/carl/code/minimize/minimize.m
 
+* rbm.h the DBN/Autoencoder implementation.
+* mnist.h Reading MNIST data file
+* spectrum.inl RGBs to map the weights to a color. Blue is 0 and red is close to 1.
+* demo.cc training/test demos
+
+# Visulization
+Input is on Y-axis (rows) and output is on X-axis (columns). There are 4 RBMs in the sample image (rbm-131.png).
+
 # Build
 
 C++ 11 is extensivily used and currently only clang 3.1 is tested for building. GraphicsMagick is used to generate the representation and is the only dependency.
