@@ -8,10 +8,12 @@ The Conjugate Gradient implementation is based (translated and simplfied) on Car
 * spectrum.inl RGBs to map weights to colors. Blue is 0 and red is close to 1.0.
 * demo.cc training/test demos
 
-# Visualization
-Input is on Y-axis (rows) and output is on X-axis (columns). There are 4 RBMs in the sample image (rbm-131.png): 784->300, 300->300, 300->500, 500->10.
+It is done with two weekends so there will be bugs and defects. 
 
-# Build
+# Visualization
+It is not trivial to monitor an optimization procedure with 1 million parameters or more. One way is to map the weights to colors (assuming most of the weights are within [-1,1]) and show them together as an image. Input is on Y-axis (rows) and output is on X-axis (columns). There are 4 RBMs in the sample image (rbm-131.png): 784->300, 300->300, 300->500, 500->10. Check out the images periodically and you can have a rought idea whether the parameters look right.
+
+# Building
 
 C++ 11 is extensivily used and currently only clang 3.1 is tested for building. GraphicsMagick is used to generate the representation and is the only dependency.
 
@@ -27,9 +29,11 @@ Under Ubuntu it is much easier thanks to the new version of libstdc++. Once you 
 
 `clang++ --std=c++0x -o dbn -g -O2 demo.cc -lz -I /usr/include/GraphicsMagick -lGraphicsMagick++`
 
-You'll also need to install GraphicsMagick with apt-get before that.
+You'll also need to install GraphicsMagick probably with apt-get before that.
 
 # Train and Test
+The data fiels are available at http://yann.lecun.com/exdb/mnist/.
+
 The command line looks like: ./dbn <command> <path-to-mnist-image-file> <path-to-mnist-label-file> where command could be "train", "train-simple", "test", "test-simple", "train-encoder" etc.
 It is highly recommended that you read through demo.cc before running tests.
 
@@ -41,7 +45,7 @@ There are 3 types of topology: simple DBN, fine tuned DBN and Autoencoder.
 The default monitoring function (progress in demo.cc) will generate a snapshot of the DBN periodically with a rbm-<n>.png and rbm-<n>.dat file. The png file shows the weight changes in a straightforward way. The .dat file can be used for testing with renaming to the correct name (e.g., dbn.dat).
 
 # Performance
-There is no extensive testing result yet. Below are some intial numbers for your information based on training with first half of the 10k testing dataset. Testing is carried out on the whole 10k dataset. It takes about an hour to train. Testing is fast.
+There is no extensive testing result yet. Below are some intial numbers for your information based on training with first half of the 10k testing dataset witha few epoches(< 10). Testing is carried out on the whole 10k dataset. It takes about an hour to train. Testing is fast.
 
 * Simple DBN: ~87%.
 * Fine tuned DBN: on the 5000 training set, 100%; on the whole set, ~98%.
