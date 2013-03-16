@@ -1,7 +1,7 @@
 # Source Code
 The deep learning algorithm is based on the matlab code provided by Geoff Hinton etc at http://www.cs.toronto.edu/~hinton/MatlabForSciencePaper.html
 
-The Conjugate Gradient implementation is almost a direct translation of Carl Edward Rasmussen's matlab code at http://learning.eng.cam.ac.uk/carl/code/minimize/minimize.m
+The Conjugate Gradient implementation is based (translated and simplfied) on Carl Edward Rasmussen's matlab code at http://learning.eng.cam.ac.uk/carl/code/minimize/minimize.m
 
 * rbm.h the DBN/Autoencoder implementation.
 * mnist.h Reading MNIST data file

@@ -1,3 +1,39 @@
+/*
+Copyright (c) 2013, jackdeng@gmail.com
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+// Algorithm is based on matlab code from http://www.cs.toronto.edu/~hinton/MatlabForSciencePaper.html
+/*
+Training a deep autoencoder or a classifier 
+on MNIST digits
+
+Code provided by Ruslan Salakhutdinov and Geoff Hinton 
+Permission is granted for anyone to copy, use, modify, or distribute this program and accompanying programs and documents for any purpose, provided this copyright notice is retained and prominently displayed, along with a note saying that the original programs are available from our web page. The programs and documents are distributed without any warranty, express or implied. As the programs were written for research purposes only, they have not been tested to the degree that would be advisable in any important application. All use of these programs is entirely at the user's own risk.
+*/
+
+// Conjugate Gradient implementation is based on matlab code at http://learning.eng.cam.ac.uk/carl/code/minimize/minimize.m
+// % Copyright (C) 2001 - 2006 by Carl Edward Rasmussen (2006-09-08).
+
 #pragma once
 
 #include <numeric>
@@ -12,7 +48,6 @@
 #include <assert.h>
 
 /*
- * based on matlab code from http://www.cs.toronto.edu/~hinton/MatlabForSciencePaper.html
  */
 template <typename T>
 struct Vector: public std::vector<typename std::enable_if<std::is_floating_point<T>::value, T>::type>
