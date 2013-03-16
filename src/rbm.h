@@ -47,8 +47,6 @@ Permission is granted for anyone to copy, use, modify, or distribute this progra
 #include <time.h>
 #include <assert.h>
 
-/*
- */
 template <typename T>
 struct Vector: public std::vector<typename std::enable_if<std::is_floating_point<T>::value, T>::type>
 {
