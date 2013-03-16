@@ -5,11 +5,11 @@ The Conjugate Gradient implementation is almost a direct translation of Carl Edw
 
 * rbm.h the DBN/Autoencoder implementation.
 * mnist.h Reading MNIST data file
-* spectrum.inl RGBs to map the weights to a color. Blue is 0 and red is close to 1.
+* spectrum.inl RGBs to map weights to colors. Blue is 0 and red is close to 1.0.
 * demo.cc training/test demos
 
 # Visualization
-Input is on Y-axis (rows) and output is on X-axis (columns). There are 4 RBMs in the sample image (rbm-131.png).
+Input is on Y-axis (rows) and output is on X-axis (columns). There are 4 RBMs in the sample image (rbm-131.png): 784->300, 300->300, 300->500, 500->10.
 
 # Build
 
