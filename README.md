@@ -41,9 +41,11 @@ There are 3 types of topology: simple DBN, fine tuned DBN and Autoencoder.
 The default monitoring function (progress in demo.cc) will generate a snapshot of the DBN periodically with a rbm-<n>.png and rbm-<n>.dat file. The png file shows the weight changes in a straightforward way. The .dat file can be used for testing with renaming to the correct name (e.g., dbn.dat).
 
 # Performance
-There is no extensive testing result yet. Below are some intial numbers for your information based on training with first half of the 10k testing dataset. Testing is carried out on the whole 10k dataset.
+There is no extensive testing result yet. Below are some intial numbers for your information based on training with first half of the 10k testing dataset. Testing is carried out on the whole 10k dataset. It takes about an hour to train. Testing is fast.
 
 * Simple DBN: ~87%.
 * Fine tuned DBN: on the 5000 training set, 100%; on the whole set, ~98%.
 
 The improvement from the CG fine tuning is obvious. It would not be difficult to tune and reproduce the same results in Hinton's paers.
+
+During the tests it turns out that the topology (numbers of hidden/visible units) does not impact much on the performance.
