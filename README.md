@@ -1,4 +1,5 @@
-* Build
+= Build
+
 C++ 11 is extensivily used and currently only clang 3.1 is tested for building. GraphicsMagick is used to generate the representation and is the only dependency.
 
 Under MacOS X, GraphicsMagick installed by brew probably won't work due to libc++/libstdc++ subtleties. But you can use it to install the header files and dependent libraries like libjpeg, libpng, etc.
@@ -14,7 +15,7 @@ clang++ --std=c++0x -o dbn -g -O2 demo.cc -lz -I /usr/include/GraphicsMagick -lG
 
 You'll also need to install GraphicsMagick with apt-get before that.
 
-* Train and Test
+= Train and Test
 The command line looks like: ./dbn <command> <path-to-mnist-image-file> <path-to-mnist-label-file> where command could be "train", "train-simple", "test", "test-simple", "train-encoder" etc.
 It is highly recommended that you read through demo.cc before running tests.
 
