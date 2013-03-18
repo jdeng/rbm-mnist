@@ -23,7 +23,7 @@ Then you can build a private static GraphicMagick library with:
 `CC=clang CXX=clang++ CXXFLAGS="-stdlib=libc++" ./configure --enable-static --disable-shared --disable-openmp`
 
 After that you can build dbn with something like below (replace the path to GrphicsMagick accordingly)
-clang++ -g -O2 -std=c++11 -stdlib=libc++ -I/usr/local/include/GraphicsMagick -o dbn demo.cc /Users/jack/Downloads/GraphicsMagick-1.3.18/Magick++/lib/.libs/libGraphicsMagick++.a  /Users/jack/Downloads/GraphicsMagick-1.3.18/magick/.libs/libGraphicsMagick.a -lz -lxml2 -lpng -ljpeg -lbz2
+`clang++ -g -O2 -std=c++11 -stdlib=libc++ -I/usr/local/include/GraphicsMagick -o dbn demo.cc /Users/jack/Downloads/GraphicsMagick-1.3.18/Magick++/lib/.libs/libGraphicsMagick++.a  /Users/jack/Downloads/GraphicsMagick-1.3.18/magick/.libs/libGraphicsMagick.a -lz -lxml2 -lpng -ljpeg -lbz2`
 
 Under Ubuntu it is much easier thanks to the new version of libstdc++. Once you have clang 3.1 installed (Here is a source: http://askubuntu.com/questions/141597/llvm-clang-3-1-libc), you can build the software with
 
