@@ -36,12 +36,12 @@ int main(int argc, const char *argv[])
 
 	// initialize data
 	int data_size = samples[0].data_.size();
-	std::vector<RealVector> inputs(n);
-	std::vector<RealVector> targets(n);
+	std::vector<Vector> inputs(n);
+	std::vector<Vector> targets(n);
 	for (size_t i=0; i< n; ++i) {
 		const Sample& sample = samples[i];
-		RealVector& input = inputs[i];
-		RealVector& target = targets[i];
+		Vector& input = inputs[i];
+		Vector& target = targets[i];
 
 		input.resize(data_size); target.resize(10);
 		for (size_t j=0; j<data_size; ++j) input[j] = sample.data_[j] / 255.0; // > 30 ? 1.0: 0.0; // binary 
@@ -52,7 +52,7 @@ int main(int argc, const char *argv[])
 	auto progress = [&pallet](DeepBeliefNet& dbn) {
 		static int i = 0;
 		int width = 0, height = 0;
-		RealVector pixels;
+		Vector pixels;
 		dbn.to_image(pixels, width, height);
 
 		Magick::Image img(Magick::Geometry(width * 2, height * 2), Magick::Color(255,255,255));
@@ -65,7 +65,7 @@ int main(int argc, const char *argv[])
 		}
 		std::string name = "rbm-" + std::to_string(i++);
 		std::string fn = name + ".png";
-		img.write(fn.c_str());
+//		img.write(fn.c_str());
 
 		std::ofstream f(name + ".dat", std::ofstream::binary);
 		dbn.store(f);
@@ -145,11 +145,12 @@ int main(int argc, const char *argv[])
 			std::vector<int> idx(10);
 			for(int i=0; i<10; ++i) idx[i] = i;
 
-			RealVector output(10);
+			static Vector nil;
+			Vector output(10);
 			if (is_simple)
-				rbm.predict(inputs[i], output, RealVector::nil());
+				rbm.predict(inputs[i], output, nil);
 			else
-				rbm.predict(inputs[i], RealVector::nil(), output);
+				rbm.predict(inputs[i], nil, output);
 
 			std::sort(idx.begin(), idx.end(), [&output](int x, int y) { return output[x] > output[y]; });
 
