@@ -51,6 +51,8 @@ int main(int argc, const char *argv[])
 	// progress monitoring
 	auto progress = [&pallet](DeepBeliefNet& dbn) {
 		static int i = 0;
+		std::string name = "rbm-" + std::to_string(i++);
+#if 0
 		int width = 0, height = 0;
 		Vector pixels;
 		dbn.to_image(pixels, width, height);
@@ -63,9 +65,9 @@ int main(int argc, const char *argv[])
 					img.pixelColor(x, y, pallet[i]);
 				}
 		}
-		std::string name = "rbm-" + std::to_string(i++);
 		std::string fn = name + ".png";
-//		img.write(fn.c_str());
+		img.write(fn.c_str());
+#endif
 
 		std::ofstream f(name + ".dat", std::ofstream::binary);
 		dbn.store(f);
