@@ -101,6 +101,7 @@ int main(int argc, const char *argv[])
 		if (resume) {
 			std::ifstream f("dbn.dat", std::ifstream::binary);
 			dbn.load(f);
+			conf.max_epoch_ = 2; conf.max_batches_ = 300; conf.batch_size_ = 200;
 		}
 		else {
 			conf.max_epoch_ = 10; conf.max_batches_ = 50; conf.batch_size_ = 100;
