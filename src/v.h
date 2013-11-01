@@ -43,7 +43,7 @@ namespace v {
 		while (--m >= 0) { (*xd++) +=  (g * (*yd++)  + h * (*zd++)); }
 	}
 
-	inline void mul(Vector& x, float g) {
+	inline void scale(Vector& x, float g) {
 		int m = x.size(); float *xd = x.data();
 		while (--m >= 0) (*xd++) *= g;
 	}

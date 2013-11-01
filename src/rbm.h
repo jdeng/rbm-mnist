@@ -41,13 +41,9 @@ Permission is granted for anyone to copy, use, modify, or distribute this progra
 #include <random>
 #include <memory>
 #include <fstream>
-#include <cmath>
+#include <chrono>
 
 #include "v.h"
-
-#include <math.h>
-#include <time.h>
-#include <assert.h>
 
 struct Batch: public std::pair<std::vector<Vector>::iterator, std::vector<Vector>::iterator>
 {
@@ -115,11 +111,11 @@ struct RBM
 
   size_t num_hidden() const { return bias_hidden_.size(); }
   size_t num_visible() const { return bias_visible_.size(); }
+  size_t num_weight() const { return weight_.size(); }
 
   int mirror(const RBM& rbm)
   {
-    size_t n_visible = bias_visible_.size();
-    size_t n_hidden = bias_hidden_.size();
+    size_t n_visible = bias_visible_.size(), n_hidden = bias_hidden_.size();
     if (n_hidden != rbm.num_visible() || n_visible != rbm.num_hidden()) { 
       std::cout << "not mirrorable" << std::endl;
       return -1;
@@ -129,7 +125,6 @@ struct RBM
     bias_hidden_ = rbm.bias_visible_;
     for (size_t i = 0; i < n_visible; ++i) {
        for (size_t j = 0; j < n_hidden; ++j) {
-//        weight_[i * n_hidden + j] = rbm.weight_[j * n_visible + i];
         weight_[j * n_visible + i] = rbm.weight_[i * n_hidden + j];
       }
     }
@@ -143,13 +138,10 @@ struct RBM
   template <class Vector1, class Vector2, class Vector3>
   static const Vector2& activate_hidden(const Vector1& visible, Vector2& hidden, const Vector3& bias_hidden, const Vector3& weight, Type type)
   {
-    size_t n_visible = visible.size();
-    size_t n_hidden = hidden.size();
+    size_t n_visible = visible.size(), n_hidden = hidden.size();
 
     std::fill(hidden.begin(), hidden.end(), 0);
     for (size_t i = 0; i < n_hidden; ++i) {
-//      float s = 0;
-//      for (size_t j = 0; j < n_visible; ++j) s += visible[j] * weight[i * n_visible + j];
       float *xd = const_cast<float *>(weight.data() + i * n_visible);
       float s = v::dot(visible, v::LightVector(xd, xd + n_visible));
       s += bias_hidden[i];
@@ -165,13 +157,11 @@ struct RBM
 
   const Vector& activate_visible(const Vector& hidden, Vector& visible) const
   {
-    size_t n_visible = bias_visible_.size();
-    size_t n_hidden = bias_hidden_.size();
+    size_t n_visible = bias_visible_.size(), n_hidden = bias_hidden_.size();
 
     std::fill(visible.begin(), visible.end(), 0);
     for (size_t i = 0; i < n_visible; ++i) {
       float s = 0;
-//      for (size_t j = 0; j < n_hidden; ++j) s += hidden[j] * weight_[i * n_hidden + j];
       for (size_t j = 0; j < n_hidden; ++j) s += hidden[j] * weight_[j * n_visible+ i];
       s += bias_visible_[i];
 
@@ -184,10 +174,8 @@ struct RBM
 
   float train(Batch inputs, const Conf& conf)
   {
-    size_t n_visible = bias_visible_.size();
-    size_t n_hidden = bias_hidden_.size();
+    size_t n_visible = bias_visible_.size(), n_hidden = bias_hidden_.size();
     float momentum = conf.momentum_, learning_rate = conf.learning_rate_, weight_cost = conf.weight_cost_;
-
 
     // temporary results
     Vector v1(n_visible), h1(n_hidden), v2(n_visible), h2(n_hidden), hs(n_hidden);
@@ -201,7 +189,6 @@ struct RBM
       this->activate_hidden(v2, h2);
 
       for (size_t i = 0; i < n_visible; ++i) {
-//        for (size_t j = 0; j < n_hidden; ++j) gw[i * n_hidden + j] += h1[j] * v1[i] - h2[j] * v2[i];
         for (size_t j = 0; j < n_hidden; ++j) gw[j * n_visible + i] += h1[j] * v1[i] - h2[j] * v2[i];
       }
 
@@ -235,7 +222,7 @@ struct RBM
     v::saxpy(bias_visible_, 1.0, bias_visible_inc_);
 
 //    float error = sqrt(gv.dot(gv) / n_visible);
-    v::mul(gv, 1.0/n_samples);
+    v::scale(gv, 1.0/n_samples);
     float error = sqrt(v::dot(gv, gv) / n_visible);
 //    std::cout << "error: " << error << ", energy: " << free_energy() << std::endl;
 
@@ -244,13 +231,12 @@ struct RBM
 
   virtual float free_energy() const
   {
-    size_t n_visible = bias_visible_.size();
-    size_t n_hidden = bias_hidden_.size();
+    size_t n_visible = bias_visible_.size(), n_hidden = bias_hidden_.size();
     float s = 0;
-    for (size_t i = 0; i < n_visible; ++i) 
+    for (size_t i = 0; i < n_visible; ++i) {
       for (size_t j = 0; j < n_hidden; ++j) 
-//        s += weight_[i * n_hidden + j] * bias_hidden_[j] * bias_visible_[i];
         s += weight_[j * n_visible+ i] * bias_hidden_[j] * bias_visible_[i];
+    }
     return -s;
   }
 
@@ -325,28 +311,6 @@ struct LRBM // layered RBM
     }
     return dims;
   }
-
-#if 0
-  void copy_weights(Vector& in, Vector& out, int start, int end = -1)
-  {
-    bool has_in = !in.empty(), has_out = !out.empty();
-    if (end < 0) end = rbms_.size();
-    int n_layers = end - start;
-    auto& rbms = this->rbms_;
-    auto dims = this->weight_lengths(start, end);
-    for(size_t i=0; i<n_layers; ++i) { 
-      size_t offset = (i > 0)? dims[i-1]: 0;
-      auto& weight = rbms[i + start]->weight_;
-      if (has_out) std::copy(weight.begin(), weight.end(), out.begin() + offset);
-      if (has_in) std::copy(in.begin() + offset, in.begin() + offset + weight.size(), weight.begin());
-
-      offset += weight.size();
-      auto& bias = rbms[i + start]->bias_hidden_;
-      if (has_out) std::copy(bias.begin(), bias.end(), out.begin() + offset);
-      if (has_in) std::copy(in.begin() + offset, in.begin() + offset + bias.size(), bias.begin());
-    }
-  }
-#endif
 
   void to_image(Vector& image, int& width, int& height)
   {
@@ -527,7 +491,7 @@ struct DeepBeliefNet : public LRBM
     {}
   };
 
-  int gradient(GradientContext& ctx, Vector& weights, Vector& weight_incs, float& cost)
+  int gradient(GradientContext& ctx, const Vector& weights, Vector& weight_incs, float& cost)
   {
     Batch& inputs = ctx.inputs_;
     std::vector<std::vector<Vector>>& probs = ctx.probs_; 
@@ -539,13 +503,10 @@ struct DeepBeliefNet : public LRBM
     size_t n_samples = inputs.size();
     std::vector<Vector> diffs(n_samples);
 
-    //use new weights
-//    Vector backup(weights.size());
-//    if (! weights.empty()) this->copy_weights(weights, backup, ctx.start_layer_);
+    auto cstart = std::chrono::high_resolution_clock::now();
+    auto dims = this->offsets(ctx.start_layer_);
 
     std::fill(weight_incs.begin(), weight_incs.end(), 0);
-
-    auto dims = this->offsets(ctx.start_layer_);
     cost = 0;
     float error = 0;
     for (size_t sample = 0; sample < n_samples; ++sample) { 
@@ -554,13 +515,13 @@ struct DeepBeliefNet : public LRBM
       for (int layer=0; layer < max_layer; ++layer) {
         const RBMP& rbm = this->rbms_[layer];
         if (layer < ctx.start_layer_ || weights.empty()) { 
-          float *start = const_cast<float *>(rbm->weight_.data()), *end = start + rbm->weight_.size();
+          float *start = const_cast<float *>(rbm->weight_.data()), *end = start + rbm->num_weight();
           weight = v::LightVector(start, end);
-          start = const_cast<float *>(rbm->bias_hidden_.data()); end = start + rbm->bias_hidden_.size();
+          start = const_cast<float *>(rbm->bias_hidden_.data()); end = start + rbm->num_hidden();
           bias_hidden = v::LightVector(start, end);
         }
         else { 
-          float *start = weights.data() + dims[layer - ctx.start_layer_], *end = start + rbm->weight_.size();
+          float *start = const_cast<float *>(weights.data()) + dims[layer - ctx.start_layer_], *end = start + rbm->num_weight();
           weight = v::LightVector(start, end);
           start = end; end = start + rbm->num_hidden();
           bias_hidden = v::LightVector(start, end);
@@ -578,8 +539,7 @@ struct DeepBeliefNet : public LRBM
 
       if (has_targets) {
         float s = std::accumulate(result.begin(), result.end(), 0.0);
-//        result /= s;
-        v::mul(result, 1.0/s);
+        v::scale(result, 1.0/s);
 
         const Vector& target = ctx.targets_[sample];
         for(size_t i=0; i<n_hidden; ++i) {
@@ -596,6 +556,10 @@ struct DeepBeliefNet : public LRBM
       }
     }
 
+    cost = -cost;
+    if (! has_targets) cost *= 1/ n_samples;
+
+    //calculate gradient
     for (int layer=max_layer - 1; layer >= 0; --layer) {
       if (layer < ctx.start_layer_) 
         break;
@@ -603,9 +567,9 @@ struct DeepBeliefNet : public LRBM
       if (layer != max_layer - 1) {
         const RBMP& rbm = this->rbms_[layer + 1];
 //        const Vector& weight = rbm->weight_; 
-        float *start = weights.data() + dims[layer + 1 - ctx.start_layer_], *end = start + rbm->weight_.size();
-        v::LightVector weight(start, end);
         size_t n_visible = rbm->num_visible(), n_hidden = rbm->num_hidden();
+        size_t offset = dims[layer + 1 - ctx.start_layer_];
+        v::LightVector weight(const_cast<float *>(weights.data()) + offset, const_cast<float *>(weights.data()) + offset + rbm->num_weight());
         for (size_t sample = 0; sample < n_samples; ++sample) { 
           Vector diff(n_visible);
           for (size_t j=0; j<n_visible; ++j) {
@@ -619,38 +583,13 @@ struct DeepBeliefNet : public LRBM
             diff[j] = s;
           }
           diffs[sample].swap(diff);
-        }  
+        } 
       }
 
       RBMP& rbm = this->rbms_[layer];
       size_t n_visible = rbm->num_visible(), n_hidden = rbm->num_hidden();
       size_t offset = dims[layer - ctx.start_layer_];
-#if 0
-      for (size_t j=0; j<n_visible + 1; ++j) {
-        for (size_t k=0; k<n_hidden; ++k) {
-          double s = 0;
-          if (j >= n_visible) {
-            for (size_t sample = 0; sample < n_samples; ++sample) { 
-              s += diffs[sample][k];
-            }
-            weight_incs[offset +  n_hidden * n_visible + k] = s;
-            continue;
-          }
 
-          if (layer > 0) {
-            for (size_t sample = 0; sample < n_samples; ++sample) { 
-              s += probs[layer-1][sample][j] * diffs[sample][k];
-            }
-          } else {
-            for (size_t sample = 0; sample < n_samples; ++sample) { 
-              s += inputs[sample][j] * diffs[sample][k];
-            }
-          }
-          weight_incs[offset + k * n_visible + j] = s;
-        }
-      }
-
-#else
       for (size_t sample = 0; sample < n_samples; ++sample) { 
         const auto& v = (layer > 0? probs[layer-1][sample] : inputs[sample]);
         const auto& d = diffs[sample];
@@ -663,17 +602,12 @@ struct DeepBeliefNet : public LRBM
             weight_incs[offset + n_visible * n_hidden + k] += d[k];
         }
       }
-#endif
-
     }
 
-    cost = -cost;
-    if (! has_targets) cost *= 1/ n_samples;
-    std::cout << "evaluating: cost=" << cost << ", error=" << error / n_samples << std::endl;
+    auto cend = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(cend - cstart).count() / 1000.0;
+    std::cout << "evaluating: cost=" << cost << ", error=" << error / n_samples << " in " << duration << "ms" << std::endl;
 
-    //restore weights
-    static Vector nil;
-//    if (! weights.empty()) this->copy_weights(backup, nil, ctx.start_layer_);
     return 0;
   }
 
@@ -690,22 +624,21 @@ struct DeepBeliefNet : public LRBM
     auto dims = this->offsets(ctx.start_layer_); 
     Vector weights(dims.back()), weight_incs(dims.back()); 
 
-//    this->copy_weights(nil, weights, ctx.start_layer_);
     {
       auto offset = weights.begin();
-    for (size_t i=ctx.start_layer_; i<this->rbms_.size(); ++i) {
-      const RBMP& rbm = this->rbms_[i];
-      std::copy(rbm->weight_.begin(), rbm->weight_.end(), offset);
-      offset += rbm->weight_.size();
-      std::copy(rbm->bias_hidden_.begin(), rbm->bias_hidden_.end(), offset);
-      offset += rbm->bias_hidden_.size();
-    }
+      for (size_t i=ctx.start_layer_; i<this->rbms_.size(); ++i) {
+        const RBMP& rbm = this->rbms_[i];
+        std::copy(rbm->weight_.begin(), rbm->weight_.end(), offset);
+        offset += rbm->num_weight();
+        std::copy(rbm->bias_hidden_.begin(), rbm->bias_hidden_.end(), offset);
+        offset += rbm->num_hidden();
+      }
     }
 
     this->gradient(ctx, weights, weight_incs, cost);
     
     Vector df0(weight_incs);
-    Vector s(df0); v::mul(s, -1.0);
+    Vector s(df0); v::scale(s, -1.0);
     float d0 = -v::dot(s, s), f0 = cost;
     float d3 = 0, x3 = 1.0 / (1 - d0);
 
@@ -822,7 +755,7 @@ struct DeepBeliefNet : public LRBM
         d3 = d0; d0  = v::dot(df3, s); df0 = df3; 
         if (d0 > 0) {
 //          s = -df0; d0 = -df0.dot(df0);
-          s = df0; v::mul(s, -1.0); d0 = -v::dot(df0, df0);
+          s = df0; v::scale(s, -1.0); d0 = -v::dot(df0, df0);
         }
 
         x3 = x3 * std::min(RATIO, float(d3 / (d0 - 1e-37)));
@@ -834,23 +767,23 @@ struct DeepBeliefNet : public LRBM
         if (failed) break;  
 
 //        s = -df0; d0 = - s.dot(s); x3 = 1.0/(1.0-d0);
-        s = df0; v::mul(s, -1.0); d0 = -v::dot(s, s); x3 = 1.0/(1.0-d0);
+        s = df0; v::scale(s, -1.0); d0 = -v::dot(s, s); x3 = 1.0/(1.0-d0);
         failed = true;
       }
     }
 
     //apply the new weights
-//    this->copy_weights(weights, nil, ctx.start_layer_);
     {
-    auto offset = weights.begin();
-    for (size_t i=ctx.start_layer_; i<this->rbms_.size(); ++i) {
-      const RBMP& rbm = this->rbms_[i];
-      std::copy(offset, offset + rbm->weight_.size(), rbm->weight_.begin());
-      offset += rbm->weight_.size();
-      std::copy(offset, offset + rbm->bias_hidden_.size(), rbm->bias_hidden_.begin());
-      offset += rbm->bias_hidden_.size();
+      auto offset = weights.begin();
+      for (size_t i=ctx.start_layer_; i<this->rbms_.size(); ++i) {
+        const RBMP& rbm = this->rbms_[i];
+        std::copy(offset, offset + rbm->num_weight(), rbm->weight_.begin());
+        offset += rbm->num_weight();
+        std::copy(offset, offset + rbm->num_hidden(), rbm->bias_hidden_.begin());
+        offset += rbm->num_hidden();
+      }
     }
-    }
+
     std::cout << "applying new weights to " << ctx.start_layer_ << "+" << std::endl;
     return 0;
   }

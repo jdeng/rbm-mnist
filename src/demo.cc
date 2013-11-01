@@ -106,7 +106,7 @@ int main(int argc, const char *argv[])
 			conf.max_epoch_ = 2; conf.max_batches_ = 300; conf.batch_size_ = 200;
 		}
 		else {
-			conf.max_epoch_ = 10; conf.max_batches_ = 50; conf.batch_size_ = 100;
+			conf.max_epoch_ = 10; conf.max_batches_ = 300; conf.batch_size_ = 200;
 			dbn.pretrain(inputs, conf, progress);
 		}
 
